@@ -6,6 +6,7 @@ packages:
   - vim
   - nano
   - htop
+  - tmux
 
 locale: de_DE.UTF-8
 timezone: Europe/Berlin
