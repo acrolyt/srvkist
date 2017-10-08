@@ -18,6 +18,8 @@
     - role: docker
       tags: docker
 
+    - role: bash
+
     - role: php
       tags: php
 

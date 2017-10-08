@@ -10,6 +10,7 @@ packages:
   - screen
   - git
   - curl
+  - zsh
 
 locale: de_DE.UTF-8
 timezone: Europe/Berlin
