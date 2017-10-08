@@ -3,3 +3,4 @@ vault_password_file
 *.log
 .vagrant
 vagrant
+.idea

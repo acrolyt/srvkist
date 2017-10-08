@@ -17,3 +17,15 @@
 
     - role: docker
       tags: docker
+
+    - role: php
+      tags: php
+
+    - role: mysql
+      tags: mysql
+
+    - role: phpmyadmin
+      tags: phpmyadmin
+
+    - role: mailserver
+      tags: mailserver
