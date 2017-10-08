@@ -38,7 +38,8 @@ services:
       retries: 5
 
   php-myadmin:
-    container_name: phpmyadmin/phpmyadmin
+    container_name: acrolyt-phpmyadmin
+    image: phpmyadmin/phpmyadmin
     depends_on:
       - db
     ports:
@@ -48,6 +49,37 @@ services:
       PMA_PORT: 3306
       PMA_USER: ${MYSQL_USER-dev}
       PMA_PASSWORD: ${MYSQL_PASSWORD-dev}
+
+  mailsserver:
+    container_name: acrolyt-mail
+    image: tvial/docker-mailserver:latest
+    hostname: mail
+    domainname: domain.com
+    container_name: mail
+    ports:
+    - "25:25"
+    - "143:143"
+    - "587:587"
+    - "993:993"
+    volumes:
+    - maildata:/var/mail
+    - mailstate:/var/mail-state
+    - ./config/:/tmp/docker-mailserver/
+    environment:
+    - ENABLE_SPAMASSASSIN=1
+    - ENABLE_CLAMAV=1
+    - ENABLE_FAIL2BAN=1
+    - ENABLE_POSTGREY=1
+    - ONE_DIR=1
+    - DMS_DEBUG=0
+    cap_add:
+    - NET_ADMIN
+
+    volumes:
+      maildata:
+        driver: local
+      mailstate:
+        driver: local
 
 #  node:
 #    container_name: acrolyt-node
