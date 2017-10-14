@@ -1,0 +1,20 @@
+---
+
+- name: Install oh-my-zsh
+  shell: 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
+
+- name: copy omz theme
+  copy:
+    src: "dotfiles/acrolyt.zsh-theme"
+    dest: /root/.oh-my-zsh/themes/acrolyt.zsh-theme
+
+- name: copy dotfiles
+  copy:
+    src: "dotfiles/{item}"
+    dest: "/root/{item}"
+  with_items:
+    - ".bashrc"
+    - ".bash_profile"
+    - ".zshrc"
+
+

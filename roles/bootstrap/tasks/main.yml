@@ -1,25 +1,25 @@
 ---
 
-- include: hostname.yml
+- include_tasks: hostname.yml
   tags: hostname
 
-- include: apt.yml
+- include_tasks: apt.yml
   tags: apt
 
-- include: public-keys.yml
+- include_tasks: public-keys.yml
   tags: public-keys
 
-- include: sftp.yml
+- include_tasks: sftp.yml
   tags: sftp
 
-- include: secure.yml
+- include_tasks: secure.yml
   tags: secure
 
-- include: iptables.yml
+- include_tasks: iptables.yml
   tags: iptables
 
-- include: locale.yml
+- include_tasks: locale.yml
   tags: locale
 
-- include: packages.yml
+- include_tasks: packages.yml
   tags: packages

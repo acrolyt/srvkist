@@ -6,5 +6,5 @@
     state: present
     key: "{{ item }}"
   with_file:
-    - templates/public-keys/simbo.pub
-    - templates/public-keys/sl_bytepark.pub
+    - templates/public-keys/acrolyt.pub
+    - templates/public-keys/maw_bytepark.pub

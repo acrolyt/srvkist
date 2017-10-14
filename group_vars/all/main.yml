@@ -1,6 +1,6 @@
 ---
 
-hostname: srvkist
+hostname: machet-einfach
 
 packages:
   - vim

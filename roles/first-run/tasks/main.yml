@@ -1,4 +1,4 @@
 ---
 
-- include: requirements.yml
-- include: create-admin.yml
+- include_tasks: requirements.yml
+- include_tasks: create-admin.yml

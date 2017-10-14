@@ -5,9 +5,10 @@
   become: yes
 
   roles:
-
     - role: bootstrap
       tags: bootstrap
+
+    - role: bash
 
     - role: nginx
       tags: nginx
@@ -18,16 +19,16 @@
     - role: docker
       tags: docker
 
-    - role: bash
 
-    - role: php
-      tags: php
-
-    - role: mysql
-      tags: mysql
-
-    - role: phpmyadmin
-      tags: phpmyadmin
-
-    - role: mailserver
-      tags: mailserver
+#
+#    - role: php
+#      tags: php
+#
+#    - role: mysql
+#      tags: mysql
+#
+#    - role: phpmyadmin
+#      tags: phpmyadmin
+#
+#    - role: mailserver
+#      tags: mailserver

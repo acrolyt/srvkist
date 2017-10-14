@@ -26,6 +26,8 @@ srvkist
 ## Requirements
 
   - [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html)
+  - required ansible version: 2.4.0.0 or higher
+  - Install passlib: pip install passlib
 
 
 ## Usage
