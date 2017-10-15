@@ -1,9 +1,0 @@
----
-
-- name: create web folders in {{ user_login }}’s homedir
-    file:
-      path: /home/{{ user_login }}/{{ docker_webfolder }}
-      state: directory
-      owner: www-data
-      group: www-data
-      mode: 0775

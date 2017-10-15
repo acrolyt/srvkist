@@ -28,3 +28,9 @@
 - name: Install docker-compose
   pip:
     name: docker-compose
+
+- name: copy docker-compose files
+  template:
+    src: "templates/docker-compose.yml.j2"
+    dest: "/home/{{  user_login }}/{{ docker_webfolder }}/docker-compose.yml"
+  tags: copy-docker
