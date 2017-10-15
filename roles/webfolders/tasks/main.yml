@@ -7,3 +7,19 @@
     owner: www-data
     group: www-data
     mode: 0775
+
+- name: create nextcloud folders
+  file:
+    path: "/home/{{ user_login }}/{{ docker_webfolder }}/nextcloud"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0775
+
+- name: copy nextcloud nginx config
+  copy:
+    src: templates/nginx.conf
+    dest: "/home/{{ user_login }}/{{ docker_webfolder }}/nextcloud/nginx.conf"
+    owner: www-data
+    group: www-data
+    mode: 0644

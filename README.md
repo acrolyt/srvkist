@@ -126,7 +126,20 @@ ln -s .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory vagrant
 ansible-playbook -i vagrant <PLAYBOOK>
 ```
 
+## Rebooting docker with deleted volumes
+``` sh
+dc down -v && dc up -d
+```
+## Cleanup of images
+    
+``` sh
+docker rm -f $(docker ps -a -q)
+docker rmi -f $(docker images -q)
+docker volume rm -f $(docker volume ls)
+docker ps -a
 
+docker-compose up -d
+```
 ## License
 
 The MIT License (MIT)  

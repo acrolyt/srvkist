@@ -33,4 +33,11 @@
   template:
     src: "templates/docker-compose.yml.j2"
     dest: "/home/{{  user_login }}/{{ docker_webfolder }}/docker-compose.yml"
-  tags: copy-docker
+  tags: docker-copy
+
+- name: Run docker
+#  shell: "cd /home/{{  user_login }}/{{ docker_webfolder }} && docker-compose stop {{ item }} && docker-compose up -d {{ item }}"
+  shell: "cd /home/{{  user_login }}/{{ docker_webfolder }} && docker-compose stop && docker-compose up -d"
+  with_items:
+    - nextcloud
+  tags: docker-restart

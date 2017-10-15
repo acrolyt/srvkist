@@ -6,9 +6,14 @@
     state: present
     update_cache: yes
 
+- name: Backup default config
+  copy: remote_src=True src="/etc/nginx/{{ item }}" dest="/etc/nginx/{{ item }}.bak"
+  with_items:
+      - nginx.conf
+
 - name: Copy nginx.conf
   template:
-    src: templates/{{ item }}
+    src: templates/{{ item }}.j2
     dest: /etc/nginx/{{ item }}
     mode: 0644
   notify: restart nginx
@@ -16,7 +21,28 @@
     - nginx.conf
     - secure.conf
     - common.conf
-    - conf.d/srvkist.net.conf
+    - proxy.conf
+#    - sites-available/machet-einfa.ch.conf
+    - sites-available/cloud.conf
+
+- name: Disable all sites
+  file:
+    state: absent
+    path: "/etc/nginx/sites-enabled"
+
+- name: Recreate sites-enabled
+  file:
+    state: directory
+    path: "/etc/nginx/sites-enabled"
+
+
+- name: Enable sites
+  file: remote_src=True src="/etc/nginx/sites-available/{{ item }}"
+              dest="/etc/nginx/sites-enabled/{{ item }}"
+              state=link
+  with_items:
+    # - machet-einfa.ch.conf
+    - cloud.conf
 
 - name: Ensure nginx cache
   file:
