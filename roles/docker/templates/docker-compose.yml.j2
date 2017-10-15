@@ -2,41 +2,78 @@
 version: "2.1"
 
 volumes:
-  mysql:
-  mailserver:
+#  mailserver:
+  redis:
+  postgres:
+  nextcloud:
+  mariadb:
+#  maildata:
+#    driver: local
+#  mailstate:
+#    driver: local
 
 services:
 
   web:
     container_name: acrolyt-nginx
-    image: nginx:1.13.3-alpine
+    image: nginx
     # depends_on:
     volumes:
-      - ./docker/assets/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-#    volumes_from:
-#      - app
+      # - ./docker/assets/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    volumes_from:
+      - nextcloud
+    links:
+      - nextcloud
     ports:
       - 8080:80
+    restart: always
 
-  mysql:
-    container_name: acrolyt-mysql
-    image: mysql
+  nextcloud:
+    image: nextcloud:fpm
+    links:
+      - mariadb
     volumes:
-      - mysql:/var/lib/mysql
-    environment:
-      MYSQL_DATABASE: {{ mysql_database }}
-      MYSQL_ROOT_PASSWORD: {{ mysql_root_password }}
-      MYSQL_USER: {{ mysql_user }}
-      MYSQL_PASSWORD: {{ mysql_password }}
-    ports:
-      - 127.0.0.1:3306:3306
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      - "nextcloud:/home/{{ user_login }}/{{ docker_webfolder }}/nextcloud"
+    restart: always
 
- redis:
+  mariadb:
+    image: mariadb
+    restart: always
+    volumes:
+      - mariadb:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD= {{ mysql_root_password }}
+      - MYSQL_PASSWORD= {{ mysql_nextcloud_password }}
+      - MYSQL_DATABASE= {{ mysql_nextcloud_db }}
+      - MYSQL_USER= {{ mysql_nextcloud_user }}
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+
+#  mysql:
+#    container_name: acrolyt-mysql
+#    image: mysql
+#    volumes:
+#      - mysql:/var/lib/mysql
+#    environment:
+#      MYSQL_DATABASE: {{ mysql_database }}
+#      MYSQL_ROOT_PASSWORD: {{ mysql_root_password }}
+#      MYSQL_USER: {{ mysql_user }}
+#      MYSQL_PASSWORD: {{ mysql_password }}
+#   ports:
+#      - 127.0.0.1:3306:3306
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 5
+
+  redis:
     container_name: acrolyt-redis
     image: redis:3.2.10-alpine
     volumes:
@@ -67,45 +104,39 @@ services:
     container_name: acrolyt-phpmyadmin
     image: phpmyadmin/phpmyadmin
     depends_on:
-      - db
+      - mariadb
     ports:
       - 127.0.0.1:8080:80
     environment:
-      PMA_HOST: db
+      PMA_HOST: maria-db
       PMA_PORT: 3306
       PMA_USER: {{ pma_user }}
       PMA_PASSWORD: {{ pma_password }}
 
-  mailsserver:
-    container_name: acrolyt-mail
-    image: tvial/docker-mailserver:latest
-    hostname: mail
-    domainname: domain.com
-    container_name: mail
-    ports:
-    - "25:25"
-    - "143:143"
-    - "587:587"
-    - "993:993"
-    volumes:
-    - maildata:/var/mail
-    - mailstate:/var/mail-state
-    - ./config/:/tmp/docker-mailserver/
-    environment:
-    - ENABLE_SPAMASSASSIN=1
-    - ENABLE_CLAMAV=1
-    - ENABLE_FAIL2BAN=1
-    - ENABLE_POSTGREY=1
-    - ONE_DIR=1
-    - DMS_DEBUG=0
-    cap_add:
-    - NET_ADMIN
-
-    volumes:
-      maildata:
-        driver: local
-      mailstate:
-        driver: local
+#  mailsserver:
+#    container_name: acrolyt-mail
+#    image: tvial/docker-mailserver:latest
+#    hostname: mail
+#    domainname: domain.com
+#    container_name: mail
+#    ports:
+#      - "25:25"
+#      - "143:143"
+#      - "587:587"
+#      - "993:993"
+#    volumes:
+#      - maildata:/var/mail
+#      - mailstate:/var/mail-state
+#      - ./config/:/tmp/docker-mailserver/
+#    environment:
+#      - ENABLE_SPAMASSASSIN=1
+#      - ENABLE_CLAMAV=1
+#      - ENABLE_FAIL2BAN=1
+#      - ENABLE_POSTGREY=1
+#      - ONE_DIR=1
+#      - DMS_DEBUG=0
+#    cap_add:
+#      - NET_ADMIN
 
 #  node:
 #    container_name: acrolyt-node

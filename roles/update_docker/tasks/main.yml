@@ -1,0 +1,9 @@
+---
+
+
+# TODO
+# with_items
+# $ docker pull nextcloud
+# $ docker stop <your_nextcloud_container>
+# $ docker rm <your_nextcloud_container>
+# $ docker run <OPTIONS> -d nextcloud
