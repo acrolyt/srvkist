@@ -4,4 +4,9 @@ user_login: admin
 user_password: secret-password
 user_id_rsa_path: ~/.ssh/id_rsa.pub
 
+ansible_user: root
+ansible_ssh_pass: even-more-secret-password
+
+docker_webfolder: myweb
+
 letsencrypt_email: foo@bar.com

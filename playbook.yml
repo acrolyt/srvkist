@@ -9,12 +9,16 @@
       tags: bootstrap
 
     - role: bash
+      tags: bash
 
     - role: nginx
       tags: nginx
 
     - role: letsencrypt
       tags: letsencrypt
+
+    - role: webfolders
+      tags: webfolders
 
     - role: docker
       tags: docker
