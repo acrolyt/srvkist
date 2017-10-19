@@ -23,7 +23,8 @@
     - common.conf
     - proxy.conf
 #    - sites-available/machet-einfa.ch.conf
-    - sites-available/cloud.conf
+#    - sites-available/cloud.conf
+    - sites-available/cloud.machet-einfa.ch.conf
 
 - name: Disable all sites
   file:
@@ -42,7 +43,8 @@
               state=link
   with_items:
     # - machet-einfa.ch.conf
-    - cloud.conf
+    # - cloud.conf
+    - cloud.machet-einfa.ch.conf
 
 - name: Ensure nginx cache
   file:

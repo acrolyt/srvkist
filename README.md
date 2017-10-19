@@ -133,12 +133,15 @@ dc down -v && dc up -d
 ## Cleanup of images
     
 ``` sh
-docker rm -f $(docker ps -a -q)
-docker rmi -f $(docker images -q)
-docker volume rm -f $(docker volume ls)
+docker rm -f $(docker ps -a -q) &&\
+docker rmi -f $(docker images -q) &&\
+docker volume rm -f $(docker volume ls);
 docker ps -a
 
 docker-compose up -d
+
+docker-compose up -d --build --force-recreate app
+docker-compose up -d --force-recreate app
 ```
 ## License
 

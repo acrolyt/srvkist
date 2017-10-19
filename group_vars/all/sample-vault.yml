@@ -9,18 +9,21 @@ ansible_ssh_pass: even-more-secret-password
 
 docker_webfolder: myweb
 
-mysql_database:
-mysql_root_password:
-mysql_user:
-mysql_password:
+mysql_database: dev
+mysql_root_password: dev
+mysql_user: dev
+mysql_password: dev
+nextcloud_admin: dev
+nextcloud_admin_pw: dev
+nextcloud_domain: cloud.sample.com
 
-redis_password:
+redis_password: dev
 
-pg_root_database:
-pg_user:
-pg_password:
+pg_root_database: dev
+pg_user: dev
+pg_password: dev
 
-pma_user:
-pma_password:
+pma_user: dev
+pma_password: dev
 
 letsencrypt_email: foo@bar.com

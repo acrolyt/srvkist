@@ -5,7 +5,6 @@ volumes:
 #  mailserver:
   redis:
   postgres:
-  nextcloud:
   mariadb:
 #  maildata:
 #    driver: local
@@ -14,43 +13,72 @@ volumes:
 
 services:
 
-  web:
-    container_name: acrolyt-nginx
-    image: nginx
-    # depends_on:
-    volumes:
-      # - ./docker/assets/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nextcloud/nginx.conf:/etc/nginx/nginx.conf:ro
-    volumes_from:
-      - nextcloud
-    links:
-      - nextcloud
-    ports:
-      - 8080:80
+  sslproxy:
+    image: danieldent/nginx-ssl-proxy
     restart: always
+    environment:
+      SERVERNAME: {{ nextcloud_domain }}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./configs/nginx/:/etc/nginx/conf.d
+      - ./configs/letsencrypt:/etc/letsencrypt
+
+  nextcloud-db:
+    image: mariadb:10
+    volumes:
+      - ./nextclouddb:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD={{ mysql_root_password }}
+      - MYSQL_PASSWORD={{ mysql_nextcloud_password }}
+      - MYSQL_DATABASE={{ mysql_nextcloud_db }}
+      - MYSQL_USER={{ mysql_nextcloud_user }}
+
 
   nextcloud:
-    image: nextcloud:fpm
-    links:
-      - mariadb
-#    volumes:
-#      - "nextcloud:/home/{{ user_login }}/{{ docker_webfolder }}/nextcloud/src"
-#      - "apps:/home/{{ user_login }}/{{ docker_webfolder }}/nextcloud/custom_apps"
-#      - "config:/home/{{ user_login }}/{{ docker_webfolder }}/nextcloud/config"
-#      - "data:/home/{{ user_login }}/{{ docker_webfolder }}/nextcloud/data"
-#      - theme:/var/www/html/themes/<YOUR_CUSTOM_THEME>
+    image: wonderfall/nextcloud
+#    links:
+#      - mariadb
     restart: always
-
-  mariadb:
-    image: mariadb
-    restart: always
-    volumes:
-      - mariadb:/var/lib/mysql
+    depends_on:
+      - nextcloud-db           # If using MySQL
     environment:
-      - MYSQL_ROOT_PASSWORD= {{ mysql_root_password }}
-      - MYSQL_PASSWORD= {{ mysql_nextcloud_password }}
-      - MYSQL_DATABASE= {{ mysql_nextcloud_db }}
-      - MYSQL_USER= {{ mysql_nextcloud_user }}
+      - UID=1000
+      - GID=1000
+      - UPLOAD_MAX_SIZE=100G
+      - APC_SHM_SIZE=128M
+      - OPCACHE_MEM_SIZE=128
+      - REDIS_MAX_MEMORY=64mb
+      - CRON_PERIOD=15m
+      - TZ=Europe/Berlin
+      - ADMIN_USER={{ nextcloud_admin }}               # Don't set to configure through browser
+      - ADMIN_PASSWORD={{ nextcloud_admin_pw }}        # Don't set to configure through browser
+      - DOMAIN={{ nextcloud_domain }}
+      - DB_TYPE=mysql
+      - DB_NAME={{ mysql_nextcloud_db }}
+      - DB_USER={{ mysql_nextcloud_user }}
+      - DB_PASSWORD={{ mysql_nextcloud_password }}
+      - DB_HOST=nextcloud-db
+    volumes:
+       - ./docker/nextcloud/data:/data
+       - ./docker/nextcloud/config:/config
+       - ./docker/nextcloud/apps:/apps2
+       - ./docker/nextcloud/themes:/nextcloud/themes
+    ports:
+      - 8888:8888
+
+
+#  mariadb:
+#    image: mariadb
+#    restart: always
+#    volumes:
+#      - ./var/mysql:/var/lib/mysql
+#    environment:
+#      - MYSQL_ROOT_PASSWORD: {{ mysql_root_password }}
+#      - MYSQL_PASSWORD: {{ mysql_nextcloud_password }}
+#      - MYSQL_DATABASE: {{ mysql_nextcloud_db }}
+#      - MYSQL_USER: {{ mysql_nextcloud_user }}
 
   adminer:
     image: adminer

@@ -29,15 +29,41 @@
   pip:
     name: docker-compose
 
-- name: copy docker-compose files
+- name: Copy docker-compose files
   template:
     src: "templates/docker-compose.yml.j2"
-    dest: "/home/{{  user_login }}/{{ docker_webfolder }}/docker-compose.yml"
+    dest: "/home/{{ user_login }}/{{ docker_webfolder }}/docker-compose.yml"
   tags: docker-copy
 
+- name: Create config folders
+  file:
+    path: /home/{{ user_login }}/{{ item }}
+    state: directory
+    mode: 0750
+  with_items:
+    - "{{ docker_webfolder }}/www"
+    - "{{ docker_webfolder }}/configs"
+    - "{{ docker_webfolder }}/configs/nginx"
+    - "{{ docker_webfolder }}/configs/letsencrypt"
+    - "{{ docker_webfolder }}/mysql"
+    - "{{ docker_webfolder }}/nextclouddb"
+    - "{{ docker_webfolder }}/docker"
+    - "{{ docker_webfolder }}/docker/nextcloud/data"
+    - "{{ docker_webfolder }}/docker/nextcloud/config"
+    - "{{ docker_webfolder }}/docker/nextcloud/apps"
+    - "{{ docker_webfolder }}/docker/nextcloud/themes"
+
+- name: Move config files
+  copy:
+    src: "templates/{{ item.from }}/"
+    dest: "/home/{{ user_login }}/{{ docker_webfolder }}/{{ item.to }}"
+  with_items:
+    - { from: 'sslproxy/cloudproxy.conf', to: '/configs/nginx/default.conf' }
+  tags: docker-reverse-proxy
+
 - name: Run docker
-#  shell: "cd /home/{{  user_login }}/{{ docker_webfolder }} && docker-compose stop {{ item }} && docker-compose up -d {{ item }}"
-  shell: "cd /home/{{  user_login }}/{{ docker_webfolder }} && docker-compose stop && docker-compose up -d"
+  # shell: "cd /home/{{  user_login }}/{{ docker_webfolder }} && docker-compose stop {{ item }} && docker-compose up -d {{ item }}"
+  shell: "cd /home/{{ user_login }}/{{ docker_webfolder }} && docker-compose stop && docker-compose up -d"
   with_items:
     - nextcloud
   tags: docker-restart
