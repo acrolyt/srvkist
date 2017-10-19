@@ -1,5 +1,6 @@
 ---
 
+# System
 user_login: admin
 user_password: secret-password
 user_id_rsa_path: ~/.ssh/id_rsa.pub
@@ -9,6 +10,8 @@ ansible_ssh_pass: even-more-secret-password
 
 docker_webfolder: myweb
 
+# Nextcloud
+
 mysql_database: dev
 mysql_root_password: dev
 mysql_user: dev
@@ -17,6 +20,21 @@ nextcloud_admin: dev
 nextcloud_admin_pw: dev
 nextcloud_domain: cloud.sample.com
 
+
+# gitlab
+gitlab_domain: git.sample.com
+gl_pg_user: dev
+gl_pg_pass: dev
+gl_pg_db: dev
+
+gl_secret_db_key: abcdefgHIJKLMOPqrstuvwXYZ1234567890
+gl_secret_secret_key: abcdefgHIJKLMOPqrstuvwXYZ1234567890
+gl_secret_opt_key: abcdefgHIJKLMOPqrstuvwXYZ1234567890
+
+gl_root_pw: dev
+gl_root_email: foo@bar.com
+
+# Webpages
 redis_password: dev
 
 pg_root_database: dev

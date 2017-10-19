@@ -18,6 +18,7 @@ services:
     restart: always
     environment:
       SERVERNAME: {{ nextcloud_domain }}
+      EXTRANAMES: {{ gitlab_domain }}
     ports:
       - "80:80"
       - "443:443"
@@ -25,8 +26,14 @@ services:
       - ./configs/nginx/:/etc/nginx/conf.d
       - ./configs/letsencrypt:/etc/letsencrypt
 
+  ###########################
+  ##### Nextcloud ###########
+  ###########################
+
   nextcloud-db:
     image: mariadb:10
+    links:
+      - adminer
     volumes:
       - ./nextclouddb:/var/lib/mysql
     environment:
@@ -34,12 +41,14 @@ services:
       - MYSQL_PASSWORD={{ mysql_nextcloud_password }}
       - MYSQL_DATABASE={{ mysql_nextcloud_db }}
       - MYSQL_USER={{ mysql_nextcloud_user }}
-
+    ports:
+      - 3306:3306
 
   nextcloud:
     image: wonderfall/nextcloud
-#    links:
-#      - mariadb
+    links:
+      - nextcloud-db
+      - sslproxy
     restart: always
     depends_on:
       - nextcloud-db           # If using MySQL
@@ -68,8 +77,132 @@ services:
     ports:
       - 8888:8888
 
+  ###########################
+  ######## Gitlab ###########
+  ###########################
 
-#  mariadb:
+  adminer:
+    image: adminer
+    external_links:
+      - nextcloud-db:nextcloud
+      - gitlab_postgresql:postgresql
+    restart: always
+    ports:
+      - 7777:8080
+
+  gitlab_redis:
+    restart: always
+    image: sameersbn/redis:latest
+    command:
+      - --loglevel warning
+    volumes:
+      - ./docker/gitlab/redis:/var/lib/redis:Z
+
+  gitlab_postgresql:
+    restart: always
+    links:
+      - adminer
+    image: sameersbn/postgresql:9.6-2
+    volumes:
+      - ./docker/gitlab/postgresql:/var/lib/postgresql:Z
+    environment:
+    - DB_USER={{ gl_pg_user }}
+    - DB_PASS={{ gl_pg_pass }}
+    - DB_NAME={{ gl_pg_db }}
+    - DB_EXTENSION=pg_trgm
+
+  gitlab:
+    restart: always
+    image: sameersbn/gitlab:latest
+    links:
+      - sslproxy
+    depends_on:
+      - sslproxy # maybe?
+      - gitlab_redis
+      - gitlab_postgresql
+    ports:
+    - "10080:80"
+    - "10022:22"
+    volumes:
+    - ./docker/gitlab/gitlab:/home/git/data:Z
+    environment:
+    - DEBUG=false
+
+    - DB_ADAPTER=postgresql
+    - DB_HOST=gitlab_postgresql
+    - DB_PORT=5432
+    - DB_USER={{ gl_pg_user }}
+    - DB_PASS={{ gl_pg_pass }}
+    - DB_NAME={{ gl_pg_db }}
+
+    - REDIS_HOST=gitlab_redis
+    - REDIS_PORT=6379
+
+    - TZ=Europe/Berlin
+    - GITLAB_TIMEZONE=Berlin
+
+    - GITLAB_HTTPS=false
+    - SSL_SELF_SIGNED=false
+
+    - GITLAB_HOST=localhost
+    - GITLAB_PORT=10080
+    - GITLAB_SSH_PORT=10022
+    - GITLAB_RELATIVE_URL_ROOT=
+    - GITLAB_SECRETS_DB_KEY_BASE={{ gl_secret_db_key }} # long-and-random-alphanumeric-string
+    - GITLAB_SECRETS_SECRET_KEY_BASE={{ gl_secret_secret_key }}     # long-and-random-alphanumeric-string
+    - GITLAB_SECRETS_OTP_KEY_BASE={{ gl_secret_opt_key }}        # long-and-random-alphanumeric-string
+
+    - GITLAB_ROOT_PASSWORD={{ gl_root_pw }}
+    - GITLAB_ROOT_EMAIL={{ gl_root_email }}
+
+    - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
+    - GITLAB_NOTIFY_PUSHER=false
+
+    - GITLAB_EMAIL={{ gl_root_email }}
+    - GITLAB_EMAIL_REPLY_TO={{ gl_root_email }}
+    - GITLAB_INCOMING_EMAIL_ADDRESS={{ gl_root_email }}
+
+    - GITLAB_BACKUP_SCHEDULE=daily
+    - GITLAB_BACKUP_TIME=01:00
+
+    - SMTP_ENABLED=false
+    - SMTP_DOMAIN=www.example.com
+    - SMTP_HOST=smtp.gmail.com
+    - SMTP_PORT=587
+    - SMTP_USER=mailer@example.com
+    - SMTP_PASS=password
+    - SMTP_STARTTLS=true
+    - SMTP_AUTHENTICATION=login
+
+    - IMAP_ENABLED=false
+    - IMAP_HOST=imap.gmail.com
+    - IMAP_PORT=993
+    - IMAP_USER=mailer@example.com
+    - IMAP_PASS=password
+    - IMAP_SSL=true
+    - IMAP_STARTTLS=false
+
+    - OAUTH_ENABLED=false
+    - OAUTH_AUTO_SIGN_IN_WITH_PROVIDER=
+    - OAUTH_ALLOW_SSO=
+    - OAUTH_BLOCK_AUTO_CREATED_USERS=true
+    - OAUTH_AUTO_LINK_LDAP_USER=false
+    - OAUTH_AUTO_LINK_SAML_USER=false
+    - OAUTH_EXTERNAL_PROVIDERS=
+
+    - OAUTH_GITHUB_API_KEY=
+    - OAUTH_GITHUB_APP_SECRET=
+    - OAUTH_GITHUB_URL=
+    - OAUTH_GITHUB_VERIFY_SSL=
+
+    - OAUTH_GITLAB_API_KEY=
+    - OAUTH_GITLAB_APP_SECRET=
+
+  ###########################
+  ###### Maisfeld ###########
+  ###########################
+
+#  acrolyt_mariadb:
 #    image: mariadb
 #    restart: always
 #    volumes:
@@ -79,71 +212,6 @@ services:
 #      - MYSQL_PASSWORD: {{ mysql_nextcloud_password }}
 #      - MYSQL_DATABASE: {{ mysql_nextcloud_db }}
 #      - MYSQL_USER: {{ mysql_nextcloud_user }}
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8081:8080
-
-
-#  mysql:
-#    container_name: acrolyt-mysql
-#    image: mysql
-#    volumes:
-#      - mysql:/var/lib/mysql
-#    environment:
-#      MYSQL_DATABASE: {{ mysql_database }}
-#      MYSQL_ROOT_PASSWORD: {{ mysql_root_password }}
-#      MYSQL_USER: {{ mysql_user }}
-#      MYSQL_PASSWORD: {{ mysql_password }}
-#   ports:
-#      - 127.0.0.1:3306:3306
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 5
-
-#  redis:
-#    container_name: acrolyt-redis
-#    image: redis:3.2.10-alpine
-#    volumes:
-#      - redis:/data
-#  #    - ./docker/assets/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-#    ports:
-#      - 127.0.0.1:6379:6379
-#    command: redis-server --requirepass {{ redis_password }}
-#
-#  postgres:
-#    container_name: acrolyt-postgres
-#    image: postgres:9.6.5-alpine
-#    volumes:
-#      - postgres:/var/lib/postgresql/data/
-#    environment:
-#      POSTGRES_DB: {{ pg_root_database }}
-#      POSTGRES_USER: {{ pg_user }}
-#      POSTGRES_PASSWORD: {{ pg_password }}
-#    ports:
-#      - 127.0.0.1:5432:5432
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 5
-#
-#  php-myadmin:
-#    container_name: acrolyt-phpmyadmin
-#    image: phpmyadmin/phpmyadmin
-#    depends_on:
-#      - mariadb
-#    ports:
-#      - 127.0.0.1:8080:80
-#    environment:
-#      PMA_HOST: maria-db
-#      PMA_PORT: 3306
-#      PMA_USER: {{ pma_user }}
-#      PMA_PASSWORD: {{ pma_password }}
 
 #  mailsserver:
 #    container_name: acrolyt-mail

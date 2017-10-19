@@ -55,10 +55,11 @@
 
 - name: Move config files
   copy:
-    src: "templates/{{ item.from }}/"
+    src: "templates/{{ item.from }}"
     dest: "/home/{{ user_login }}/{{ docker_webfolder }}/{{ item.to }}"
   with_items:
-    - { from: 'sslproxy/cloudproxy.conf', to: '/configs/nginx/default.conf' }
+    - { from: 'sslproxy/gitlab.conf', to: '/configs/nginx/gitlab.conf' }
+    - { from: 'sslproxy/nextcloud.conf', to: '/configs/nginx/nextcloud.conf' }
   tags: docker-reverse-proxy
 
 - name: Run docker
