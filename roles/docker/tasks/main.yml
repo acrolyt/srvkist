@@ -62,6 +62,13 @@
     - { from: 'sslproxy/nextcloud.conf', to: '/configs/nginx/nextcloud.conf' }
   tags: docker-reverse-proxy
 
+- name: Restart nginx (only on -e'RESTART=TRUE')
+  shell: "cd /home/{{  user_login }}/{{ docker_webfolder }} && docker-compose restart {{ item }}"
+  with_items:
+    - sslproxy
+  when: RESTART
+  tags: docker-reverse-proxy
+
 - name: Run docker
   # shell: "cd /home/{{  user_login }}/{{ docker_webfolder }} && docker-compose stop {{ item }} && docker-compose up -d {{ item }}"
   shell: "cd /home/{{ user_login }}/{{ docker_webfolder }} && docker-compose stop && docker-compose up -d"

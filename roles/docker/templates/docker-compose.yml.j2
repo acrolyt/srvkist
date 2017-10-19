@@ -201,6 +201,11 @@ services:
   ###########################
   ###### Maisfeld ###########
   ###########################
+  acrolyt-php:
+      image: php:7-fpm
+      volumes:
+        - ./www:/code
+
 
 #  acrolyt_mariadb:
 #    image: mariadb
